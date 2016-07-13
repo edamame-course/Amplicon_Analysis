@@ -159,7 +159,7 @@ chmod 400 **/path/to/your/keyfile/**.pem
 ```
 This command will adjust the permissions on your keyfile so that it cannot be edited. This is important because if the keyfile is edited or changed, it will no longer allow access to the EC2 instance.
 
-###3. Connecting to your EC2 instance using ssh:
+###D. Connecting to your EC2 instance using ssh:
 
 ```
 ssh -i **/path/to/your/keyfile/**eda.pem ubuntu@"your public DNS"
