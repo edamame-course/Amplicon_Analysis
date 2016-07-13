@@ -39,9 +39,9 @@ Click on the blue “Launch Instance” button (midway down the page)
 
 #### Step 1:
 
-First we need to select an AMI. An AMI is essentially a picture of a particular computer set up. In the beginning of this course we will be using an AMI maintained by the QIIME developers. Searching for "qiime" under the community AMIs will show the QIIME developers' AMI.
+First we need to select an AMI. An AMI is essentially a picture of a particular computer set up. In the beginning of this course we will be using an AMI maintained by the QIIME developers. On the left side of your EC2 management console, search for "AMIs" under Images. Find the search bar in the center of your screen. Just to the left of that, make sure "Public Images is selected". In the search bar, search for "qiime" and you will see all of QIIMEs  community AMIs.
 
-![Community AMIs](../img/EC2_AMI_QIIME.png)
+![Community AMIs](../img/EC2_AMI.png)
 
 **Note**: QIIME updates do occur and they will occasionally create an updated community AMI. If you plan on using QIIME on a community AMI after this workshop, you should always check to make sure that you're working with the "Latest Amazon Web Services (AWS) virtual machine identifier". To check that, look [here](http://qiime.org/home_static/dataFiles.html)
 
