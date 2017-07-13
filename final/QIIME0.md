@@ -1,5 +1,5 @@
 
-#How to set up a community AMI on Amazon EC2 for QIIME analysis.
+# How to set up a community AMI on Amazon EC2 for QIIME analysis.
 Authored by Jackson Sorenson for EDAMAME2016, based on a previous tutorial by Kevin Hall and Tracy Teal for EDAMAME2014
 [EDAMAME-2016 wiki](https://github.com/edamame-course/2016-tutorials/wiki)
 
@@ -7,10 +7,10 @@ Authored by Jackson Sorenson for EDAMAME2016, based on a previous tutorial by Ke
 EDAMAME tutorials have a CC-BY [license](https://github.com/edamame-course/2015-tutorials/blob/master/LICENSE.md). _Share, adapt, and attribute please!_
 ***
 
-##Overarching Goal
+## Overarching Goal
 * This tutorial will contribute towards an understanding of **cloud computing**
 
-##Learning Objectives
+## Learning Objectives
 * Select a community AMI image to initiate an Amazon EC2 instance
 * Make and use a "key" for secure EC2 connection
 
@@ -117,7 +117,7 @@ If you need to download a new keyfile, feel free to do so.
 
 * Click on the blue **Launch Instances** button.
 
-At this point Amazon will give a warning saying that the EC2 instance you are starting is "open to the world". This means that anyone is capable of accessing the instance so long as they have the public DNS and the specific key file. We are not concerned about this warning, mostly because each of us will have our own keyfile that no one else will. This means even if I had your public DNS for your EC2 instance I couldn't login to it without you keyfile as well. If you want to have extra protection in the future, you can adjust the IP address ranges in the rules under the security group part of the EC2 setup to match your specific IP address. Keep in mind laptops will change IP addresses depending upon which network they are connected.  
+At this point Amazon will give a warning saying that the EC2 instance you are starting is "open to the world". This means that anyone is capable of accessing the instance so long as they have the public DNS and the specific key file. We are not concerned about this warning, mostly because each of us will have our own keyfile that no one else will. This means even if I had your public DNS for your EC2 instance I couldn't login to it without you keyfile as well. If you want to have extra protection in the future, you can adjust the IP address ranges in the rules under the security group part of the EC2 setup to match your specific IP address. Keep in mind laptops will change IP addresses depending upon which network they are connected.
 ![Key Pair Pop-up](../img/EC2_Key_Pair.png)
 
 
@@ -139,12 +139,12 @@ At some point you will need to highlight and copy the Public DNS. This is the li
 
 Do you remember how to connect to your instance? If not, see below.
 
-###A. Find your EC2's Public DNS:
+### A. Find your EC2's Public DNS:
 See Above
 
 In the image above the full Public DNS of the highlighted instance is **ec2-52-5-171-50.compute-1.amazonaws.com**
 
-###B. Open a Terminal:
+### B. Open a Terminal:
 
 You will need to know the location of your **key pair** you created when you launched your instance.  Usually this will be in your "Downloads" folder, but you may want to move it elsewhere.
 
@@ -152,7 +152,7 @@ You will need to know the location of your **key pair** you created when you lau
 cd /Directory/containing/your/keyfile
 ```
 
-###C. Change your keyfile permisions to read only:
+### C. Change your keyfile permisions to read only:
 
 **Note: You only need to do this if you downloaded a new key file. If you're using an existing keyfile, then skip this step**
 
@@ -161,7 +161,7 @@ chmod 400 **/path/to/your/keyfile/**.pem
 ```
 This command will adjust the permissions on your keyfile so that it cannot be edited. This is important because if the keyfile is edited or changed, it will no longer allow access to the EC2 instance.
 
-###D. Connecting to your EC2 instance using ssh:
+### D. Connecting to your EC2 instance using ssh:
 
 ```
 ssh -i **/path/to/your/keyfile/**eda.pem ubuntu@"your public DNS"
@@ -172,7 +172,7 @@ On your first login, you may get a prompt stating that the host authenticity can
 SUCCESS! You have now logged into your computer in the cloud!
 
 ***
-##Help and other resources
+## Help and other resources
 * [Set-up instructions from Amazon](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/get-set-up-for-amazon-ec2.html)
 * [Amazon's help index for EC2](http://aws.amazon.com/ec2/getting-started/)
 * [Technical documentation](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html)
