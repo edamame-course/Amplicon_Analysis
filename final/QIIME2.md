@@ -66,18 +66,18 @@ To subsample the OTU table, we need to decide the appropriate subsampling depth.
 *  How important is it to keep all samples in the analysis?  Consider the costs and benefits of, for example, dropping one not-very-well-sequenced replicate in favor of increasing overall sequence information.  Will it destroy your experimental design if you remove a few samples? If you've got $$ to spare, built-in sequencing redundancy/replication is helpful for this.
 *  Don't fret!  Soon sequencing will be so inexpensive that we will be sequencing every community exhaustively and not have to worry about it anymore.
 
-In this example dataset, we want to keep all of our samples, so we will subsample to 5196, which is the minimum number of sequences in any sample. **You may need to subsample to a slightly different depth since the slight variations in the OTU picking algorithm will result in a different number reads for each sample.**   Documentation is [here](http://qiime.org/scripts/single_rarefaction.html?highlight=rarefaction).
+In this example dataset, we want to keep all of our samples, so we will subsample to 5000, which is a little smaller than the minimum number of sequences in any sample.  The clustering algorithm does not produce exactly the same clusters each time, and so slightly different numbers of sequences will survive filtering.  Subsampling everything to 5000 lets everyone use the same procedure.  Documentation is [here](http://qiime.org/scripts/single_rarefaction.html?highlight=rarefaction).
 
 ```
-single_rarefaction.py -i otu_table_mc2_w_tax.biom -o otu_table_mc2_w_tax_even5196.biom -d 5196
+single_rarefaction.py -i otu_table_mc2_w_tax.biom -o otu_table_mc2_w_tax_even5000.biom -d 5000
 ```
 
-We append even5196 to the end of the table to distinguish the subsampled table from the full table.  This is even5196 table is the final biom table on which to perform ecological analyses.  If we run the [biom summary](http://biom-format.org/documentation/summarizing_biom_tables.html) command, we will now see that every sample in the new table has exactly the same number of sequences:
+We append even5000 to the end of the table to distinguish the subsampled table from the full table.  This is even5000 table is the final biom table on which to perform ecological analyses.  If we run the [biom summary](http://biom-format.org/documentation/summarizing_biom_tables.html) command, we will now see that every sample in the new table has exactly the same number of sequences:
 
 ```
-biom summarize_table -i otu_table_mc2_w_tax_even5196.biom -o summary_otu_table_mc2_w_tax_even5196.txt
+biom summarize_table -i otu_table_mc2_w_tax_even5000.biom -o summary_otu_table_mc2_w_tax_even5000.txt
 
-head summary_otu_table_mc2_w_tax_even5196.txt
+head summary_otu_table_mc2_w_tax_even5000.txt
 ```
 
 ![img14](../img/Rarefaction.png)
@@ -91,19 +91,19 @@ There is a [paper](http://www.ploscompbiol.org/article/info%3Adoi%2F10.1371%2Fjo
 Make sure you are in the the uclust_openref/ directory, and make a new directory for alpha diversity results.
 
 ```
-mkdir WS_aDiversity_even5196
+mkdir WS_aDiversity_even5000
 ```
 
 We will calculate richness (observed # taxa) and phylogenetic diversity (PD) for each sample.  Documentation is [here](http://qiime.org/scripts/alpha_diversity.html).
 
 ```
-alpha_diversity.py -i otu_table_mc2_w_tax_even5196.biom -m observed_species,PD_whole_tree -o WS_aDiversity_even5196/WS_aDiversity_even5196.txt -t rep_set.tre
+alpha_diversity.py -i otu_table_mc2_w_tax_even5000.biom -m observed_species,PD_whole_tree -o WS_aDiversity_even5000/WS_aDiversity_even5000.txt -t rep_set.tre
 ```
 
 The `-t` flag designates the tree file for calculating phylogenetic diversity. As always, inspect the results file.  What are the ranges that were observed in richness and PD?
 
 ```
-head WS_aDiversity_even5196/WS_aDiversity_even5196.txt
+head WS_aDiversity_even5000/WS_aDiversity_even5000.txt
 ```
 
 QIIME offers a variety of additional options for calculating diversity, and the -s option prints them all!
@@ -119,7 +119,7 @@ There is workflow script, [alpha_rarefaction.py](http://qiime.org/scripts/alpha_
 `summarize_taxa_through_plots.py` is a QIIME workflow script that calculates summaries of OTUs at different taxonomic levels. Documentation is [here](http://qiime.org/scripts/summarize_taxa_through_plots.html). This will take about 10 minutes; if you want to be safe, you can [tmux](https://github.com/edamame-course/2015-tutorials/blob/master/final/2015-06-22_tmux.md).
 
 ```
-summarize_taxa_through_plots.py -o WS_aDiversity_even5196/taxa_summary5196/ -i otu_table_mc2_w_tax_even5196.biom  
+summarize_taxa_through_plots.py -o WS_aDiversity_even5000/taxa_summary5000/ -i otu_table_mc2_w_tax_even5000.biom
 ```
 
 When the script is finished, navigate into the results file, and into the "taxa_summary_plots" and find the html area and bar charts.
@@ -134,7 +134,7 @@ To view the HTML files, you will need to transfer the HTML files themselves and 
 **Note**: In the command below, make sure you place the -r flag before the -i flag. 
 
 ```
-scp -r -i **your/key/file** ubuntu@**your_DNS**:EDAMAME_16S/uclust_openref/WS_aDiversity_even5196/taxa_summary5196/taxa_summary_plots ~/Desktop
+scp -r -i **your/key/file** ubuntu@**your_DNS**:EDAMAME_16S/uclust_openref/WS_aDiversity_even5000/taxa_summary5000/taxa_summary_plots ~/Desktop
 ```
 
 The last command above contains the ```-r``` flag after ```scp```. The r means "recursive", and specifies that because we have a whole directory full of files, we want scp to go back and grab all of the files there, not just one. You will get an error if you try to scp a directory without the -r flag.  

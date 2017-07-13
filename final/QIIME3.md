@@ -34,10 +34,10 @@ copies the end-result visualizations off of our instance.
 ## 3.1 Make resemblance matrices to analyze comparative (beta) diversity
 Make sure that you are in the EDAMAME_16S/uclust_openref/ directory.  
 
-If you need the otu_table_mc2_w_tax_even5196.biom file from Parts 1 and 2 of the tutorial you can use curl to grab it from GitHub:
+If you need the otu_table_mc2_w_tax_even5000.biom file from Parts 1 and 2 of the tutorial you can use curl to grab it from GitHub:
 
 ```
-curl -O https://raw.githubusercontent.com/edamame-course/Amplicon_Analysis/master/resources/otu_table_mc2_w_tax_even5196.biom
+curl -O https://raw.githubusercontent.com/edamame-course/Amplicon_Analysis/master/resources/otu_table_mc2_w_tax_even5000.biom
 ```
 
 We will make four kinds of resemblance matrices (sample by sample comparisons) for assessing comparative diversity.
@@ -53,15 +53,15 @@ What are all these indices, mathematically?  Where do they all come from?  All t
 To compare weighted/unweighted and phylogenetic/taxonomic metrics, we will ask QIIME to create four resemblance matrices of all of these different flavors.  Navigate into the uclust_openref/ directory.
 
 ```
-beta_diversity.py -i otu_table_mc2_w_tax_even5196.biom -m unweighted_unifrac,weighted_unifrac,binary_sorensen_dice,bray_curtis -o compar_div_even5196/ -t rep_set.tre
+beta_diversity.py -i otu_table_mc2_w_tax_even5000.biom -m unweighted_unifrac,weighted_unifrac,binary_sorensen_dice,bray_curtis -o compar_div_even5000/ -t rep_set.tre
 ```
 
-Due to a bug in this version of QIIME (v 1.9.1), this may return a warning that says "VisibleDeprecationWarning". Do not be alarmed. The script has still worked as it was supposed to. Navigate to the new directory called "compar_div_even5196".
+Due to a bug in this version of QIIME (v 1.9.1), this may return a warning that says "VisibleDeprecationWarning". Do not be alarmed. The script has still worked as it was supposed to. Navigate to the new directory called "compar_div_even5000".
 
 There should be four new resemblance matrices in the directory.  Use nano to open them and compare their values.  
 
 ```
-nano binary_sorensen_dice_otu_table_mc2_w_tax_even5196.txt
+nano binary_sorensen_dice_otu_table_mc2_w_tax_even5000.txt
 ```
 
 This should be a square matrix, and the upper and lower triangles should be mirror-images.
@@ -74,7 +74,7 @@ We're going to get all crazy and move these outside of the terminal. Use scp to 
 From a terminal with your computer as the working directory, grab the entire directory by using the `-r` flag.
 
 ```
-scp -r -i your/key/file ubuntu@ec2-your_DNS.compute-1.amazonaws.com:EDAMAME_16S/uclust_openref/compar_div_even5196 ~/Desktop
+scp -r -i your/key/file ubuntu@ec2-your_DNS.compute-1.amazonaws.com:EDAMAME_16S/uclust_openref/compar_div_even5000 ~/Desktop
 ```
 
 
@@ -85,7 +85,7 @@ QIIME scripts can easily make an ordination using principal coordinates analysis
 Navigate back into the uclust_openref/ directory
 
 ```
-principal_coordinates.py -i compar_div_even5196/ -o compar_div_even5196_PCoA/
+principal_coordinates.py -i compar_div_even5000/ -o compar_div_even5000_PCoA/
 ```
 
 Notice that the `-i` command only specifies the directory, and not an individual filepath.  PCoA will be performed on all resemblances in that directory.
@@ -99,7 +99,7 @@ If we navigate into the new directory, we see there is one results file for each
 Inspect one of these files.
 
 ```
-nano pcoa_bray_curtis_otu_table_mc2_w_tax_even5196.txt
+nano pcoa_bray_curtis_otu_table_mc2_w_tax_even5000.txt
 ```
 
 ![img18](../img/BC_Eigenvalues.png)
@@ -113,7 +113,7 @@ Navigate back into the uclust_openref/ directory.
 We can make 2d plots of the output of `principal_coordinates.py`, and map the colors to the categories in the mapping file.
 
 ```
-make_2d_plots.py -i compar_div_even5196_PCoA/pcoa_weighted_unifrac_otu_table_mc2_w_tax_even5196.txt -m ../MappingFiles/Centralia_Full_Map.txt -o PCoA_2D_plot/
+make_2d_plots.py -i compar_div_even5000_PCoA/pcoa_weighted_unifrac_otu_table_mc2_w_tax_even5000.txt -m ../MappingFiles/Centralia_Full_Map.txt -o PCoA_2D_plot/
 ```
 
 (This will also give a runtime warning: "More than 20 figures have been opened. Figures created through the pyplot interface (`matplotlib.pyplot.figure`) are retained until explicitly closed and may consume too much memory." However, the script will execute as intended.)
@@ -142,9 +142,9 @@ Navigate back to uclust_openref/ directory.
 
 ```
 mkdir NMDS_Plot
-nmds.py -i compar_div_even5196/bray_curtis_otu_table_mc2_w_tax_even5196.txt -o NMDS_Plot/mc2_even5196_braycurtis_NMDS_coords.txt
+nmds.py -i compar_div_even5000/bray_curtis_otu_table_mc2_w_tax_even5000.txt -o NMDS_Plot/mc2_even5000_braycurtis_NMDS_coords.txt
 cd NMDS_Plot
-head mc2_even5196_braycurtis_NMDS_coords.txt
+head mc2_even5000_braycurtis_NMDS_coords.txt
 ```
 
 ![img20](../img/NMDS_BC.png)
@@ -152,13 +152,13 @@ head mc2_even5196_braycurtis_NMDS_coords.txt
 We can also make a quick heatmap in QIIME, which shows the number of sequences per sample relative to one another.  For our sanity (do you really want to look at ~20K OTUs at once?), let's make this heatmap at the phylum level.  To do this, we will use our phylum-level OTU table in the WS_aDiversity/ directory
 
 ```
-make_otu_heatmap.py -i WS_aDiversity_even5196/taxa_summary5196/otu_table_mc2_w_tax_even5196_L2.biom -o heatmap_L2_even5196.pdf
+make_otu_heatmap.py -i WS_aDiversity_even5000/taxa_summary5000/otu_table_mc2_w_tax_even5000_L2.biom -o heatmap_L2_even5000.pdf
 ```
 
 Move it to your desktop and open.
 
 ```
- scp -r -i **yourkey** ubuntu@**yourDNS**:EDAMAME_16S/uclust_openref/heatmap_L2_even5196.pdf  ~/Desktop
+ scp -r -i **yourkey** ubuntu@**yourDNS**:EDAMAME_16S/uclust_openref/heatmap_L2_even5000.pdf  ~/Desktop
 ```
 
 Explore this visualization.  You can filter the minimum number of OTUs, filter by sample ID, or by OTU ID.  Heatmap documentation is [here](http://qiime.org/scripts/make_otu_heatmap.html).
@@ -172,7 +172,7 @@ _Experimental Design Question: Why should we average the replicates?  Are there 
 Documentation for collapse_samples.py is [here](http://qiime.org/scripts/collapse_samples.html).  This is a really useful command - you can also easily normalize the data (make a relativized dataset).
 
 ```
-collapse_samples.py -b otu_table_mc2_w_tax_even5196.biom -m ../MappingFiles/Centralia_Full_Map.txt --collapse_fields Sample --collapse_mode mean --output_biom_fp otu_table_mc2_w_tax_even5196_CollapseReps.biom --output_mapping_fp map_collapsed_reps.txt
+collapse_samples.py -b otu_table_mc2_w_tax_even5000.biom -m ../MappingFiles/Centralia_Full_Map.txt --collapse_fields Sample --collapse_mode mean --output_biom_fp otu_table_mc2_w_tax_even5000_CollapseReps.biom --output_mapping_fp map_collapsed_reps.txt
 ```
 
 ### 3.5 Exporting the QIIME-created biom table for use in other software (R, Primer, Phinch, etc)
@@ -181,13 +181,13 @@ This command changes frequently, as the biom format is a work in progress.  Use 
 In the example below, we are making a tab-delimited text file (designated by the `--to-tsv` option) and including a final column for taxonomic assignment called "Consensus lineage".
 
 ```
-biom convert -i otu_table_mc2_w_tax_even5196_CollapseReps.biom -o otu_table_M2_w_tax_even5196_CollapseReps.txt --table-type "OTU table" --to-tsv --header-key taxonomy --output-metadata-id "ConsensusLineage"
+biom convert -i otu_table_mc2_w_tax_even5000_CollapseReps.biom -o otu_table_M2_w_tax_even5000_CollapseReps.txt --table-type "OTU table" --to-tsv --header-key taxonomy --output-metadata-id "ConsensusLineage"
 ```
 
 What are we going to do with this file?  Move it to our desktop for our future R analysis, of course!  Switch to your computer's terminal (not the EC2) to transfer the file using `scp`.
 
 ```
-scp -i **yourkey** ubuntu@**yourDNS**:EDAMAME_16S/uclust_openref/otu_table_mc2_w_tax_even5196_CollapseReps.txt ~/Desktop
+scp -i **yourkey** ubuntu@**yourDNS**:EDAMAME_16S/uclust_openref/otu_table_mc2_w_tax_even5000_CollapseReps.txt ~/Desktop
 ```
 
 Now, open it and make sure it is as you expect.  It should be a classic Species X Sample OTU table.
