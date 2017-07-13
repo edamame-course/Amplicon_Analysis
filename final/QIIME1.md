@@ -39,10 +39,10 @@ infers taxonomy for each of about 50 samples.
 ***
 
 ## 1.1 Getting started
-For this tutorial, we will be using the 16S sequencing data that we previously downloaded and unzipped. Let's connect to our EC2 instance, and then wget our data.
+For this tutorial, we will be using the 16S sequencing data that we previously downloaded and unzipped. Let's connect to our EC2 instance, and then use curl to download our data.  This is about 106 Mb compressed, and we're downloading it not onto our laptop, but onto our instance.
 
 ```
-wget https://s3.amazonaws.com/edamame/EDAMAME_16S.tar.gz
+curl -O https://s3.amazonaws.com/edamame/EDAMAME_16S.tar.gz
 tar -zxvf EDAMAME_16S.tar.gz
 ```
 
