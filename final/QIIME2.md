@@ -14,14 +14,14 @@ EDAMAME tutorials have a CC-BY [license](https://github.com/edamame-course/2015-
 
 ## Overarching Goal
 * This tutorial will contribute towards an understanding of **microbial amplicon analysis**
+This lesson takes clustered taxonomy assignments generated in the last lesson, takes samples from each to the the size of the smallest dataset, and displays some summary graphs.
 
 ## Learning Objectives
 * Extract summary information from a biom OTU table
-* Subsample a dataset to an even sequencing coverage across all ccommunity observations
+* Subsample a dataset to an even sequencing coverage across all community observations
 * Calculate and visualize within-sample (alpha) diversity
 
 ***
-
 
 ### Handout of workflow:
 -  [Paired-End Illumina QIIME open-reference workflow](https://github.com/edamame-course/2015-tutorials/blob/master/QIIME_files/QIIME%20flow%20chart.pdf)
@@ -34,17 +34,14 @@ _Welcome back, Microbe Enthusiasts!_
 
 Previously, we left off with quality-controlled merged Illumina paired-end sequences, and then used a QIIME workflow script to pick OTUs with one representative sequence from each OTU, align the representative sequences, build a tree build the alignment, and assign taxonomy to the OTU based on the representative sequence.  Wow.  That is a LOT.  Take a moment to relish in your own computational prowess.
 
-
 If you wish to filter your table before proceeding with summary statistics and visual representations (for example to remove chloroplast or mitochondrial sequences), check out [these](http://qiime.org/scripts/filter_otus_from_otu_table.html) QIIME [tutorials](http://qiime.org/tutorials/filtering_contamination_otus.html) addressing this. 
-
 
 ### 2.1  Summarize an OTU table
 
 Navigate to the uclust_openref/ directory. The OTU table is the table on which all ecological analyses (e.g. diversity, patterns, etc) are performed.  Let's use biom commands to summarize the table.  Let's proceed with the table that has singletons removed and taxonomy assigned ("mc2_w_tax.biom").
 
 ```
-biom summarize_table -i otu_table_mc2_w_tax.biom -o summary_otu_table_mc2_w_tax.txt
-
+biom summarize-table -i otu_table_mc2_w_tax.biom -o summary_otu_table_mc2_w_tax.txt
 more summary_otu_table_mc2_w_tax.txt
 ```
 
@@ -52,13 +49,12 @@ The summary file contains information about the number of sequences per sample, 
 
 ![img13](../img/Summary_Table.png)
 
-
 ### 2.2 Rarefaction (subsampling)
 
 ***
-*BREAK* Subsampling Learning Activity!
+*BREAK* 
+[Subsampling Learning Activity](https://github.com/edamame-course/2016-tutorials/tree/master/lectures/SubSamplingExercise)
 ***
-
 
 Before we start any ecological analyses, we want to evenly subsample ("rarefy", but see this [discussion](http://www.ploscompbiol.org/article/info%3Adoi%2F10.1371%2Fjournal.pcbi.1003531)) all the samples to an equal ("even") number of sequences so that they can be directly compared to one another. Many heartily agree (as exampled by [Gihring et al. 2011](http://onlinelibrary.wiley.com/doi/10.1111/j.1462-2920.2011.02550.x/full)) that sample-to-sample comparisons cannot be made unless subsampling to an equal sequencing depth is performed.
 
@@ -83,6 +79,7 @@ biom summarize_table -i otu_table_mc2_w_tax_even5196.biom -o summary_otu_table_m
 
 head summary_otu_table_mc2_w_tax_even5196.txt
 ```
+
 ![img14](../img/Rarefaction.png)
 
 Our "clean" dataset has 54 samples and 22,496 OTUs defined at 97% sequence identity.
@@ -95,7 +92,6 @@ Make sure you are in the the uclust_openref/ directory, and make a new directory
 
 ```
 mkdir WS_aDiversity_even5196
-
 ```
 
 We will calculate richness (observed # taxa) and phylogenetic diversity (PD) for each sample.  Documentation is [here](http://qiime.org/scripts/alpha_diversity.html).
@@ -139,8 +135,8 @@ To view the HTML files, you will need to transfer the HTML files themselves and 
 
 ```
 scp -r -i **your/key/file** ubuntu@**your_DNS**:EDAMAME_16S/uclust_openref/WS_aDiversity_even5196/taxa_summary5196/taxa_summary_plots ~/Desktop
-
 ```
+
 The last command above contains the ```-r``` flag after ```scp```. The r means "recursive", and specifies that because we have a whole directory full of files, we want scp to go back and grab all of the files there, not just one. You will get an error if you try to scp a directory without the -r flag.  
 
 Now go to the desktop and double-click on area_charts.html:
@@ -149,16 +145,14 @@ Now go to the desktop and double-click on area_charts.html:
  and bar_charts.html:
 ![img15](../img/Bar_Chart1.png)
 
-
 The links above and below the charts point to the raw data or other summaries.  Spend some time exploring all of the different links.
 
 In your browser, carefully inspect and interact with these quick charts.  Though these are not publication-ready, they are a great first exploration of the taxa in the dataset.
 
-
 ***
 
 ## Where to find QIIME resources and help
-*  [QIIME](qiime.org) offers a suite of developer-designed [tutorials](http://www.qiime.org/tutorials/tutorial.html).
+*  [QIIME](http://qiime.org) offers a suite of developer-designed [tutorials](http://www.qiime.org/tutorials/tutorial.html).
 *  [Documentation](http://www.qiime.org/scripts/index.html) for all QIIME scripts.
 *  There is a very active [QIIME Forum](https://groups.google.com/forum/#!forum/qiime-forum) on Google Groups.  This is a great place to troubleshoot problems, responses often are returned in a few hours!
 *  The [QIIME Blog](http://qiime.wordpress.com/) provides updates like bug fixes, new features, and new releases.

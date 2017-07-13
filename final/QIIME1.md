@@ -1,8 +1,8 @@
 ---
 layout: page
-title: "Intro to QIIME"
+title: "Intro to KIM"
 comments: true
-date: 2016-07-13
+date: 2016-06-27
 ---
 
 # Intro to QIIME for amplicon analysis
@@ -14,12 +14,14 @@ EDAMAME tutorials have a CC-BY [license](https://github.com/edamame-course/2015-
 ***
 
 ## Overarching Goal
-* This tutorial will contribute towards an understanding of **microbial amplicon analysis**
+* This tutorial will contribute towards an understanding of **microbial amplicon analysis**.
+We will take raw microbial amplicon sequence data through a workflow that filters, clusters, and
+infers taxonomy for each of about 50 samples.
 
 ## Learning Objectives
 * Install auxillary software on the QIIME EC2 image
 * Subsample a large amplicon dataset for workflow development and tutorial testing
-* Assemble paired-end reads
+* Overlap paired-end reads
 * Execute a shell script to automate a process
 * Explore input and output files for QIIME workflows and scripts
 * Understand the structure and components of a good mapping file
@@ -38,6 +40,7 @@ EDAMAME tutorials have a CC-BY [license](https://github.com/edamame-course/2015-
 
 ## 1.1 Getting started
 For this tutorial, we will be using the 16S sequencing data that we previously downloaded and unzipped. Let's connect to our EC2 instance, and then wget our data.
+
 ```
 wget https://s3.amazonaws.com/edamame/EDAMAME_16S.tar.gz
 tar -zxvf EDAMAME_16S.tar.gz
@@ -47,12 +50,12 @@ One we've done that, we'll navigate to the directory containing those files:
 ```
 cd EDAMAME_16S/Fastq
 ```
-You should see 108 files, all ending in .fastq.
+You should see 54 pairs of files, all ending in `F_sub.fastq` and `R_sub.fastq`.
 
-## 1.2 Assembling Illumina paired-end sequences
+## 1.2 Overlapping Illumina paired-end sequences
 These samples were sequenced using MiSeq 150 bp paired-end approach. Since the V4 region is only 253 bp our sequences should have ~50 bp of overlap. We can use this overlap to merge our 150 bp reads together to get the full 253 bp of the v4 region. Having longer reads gives us more information to work with when clustering reads into operational taxonomic units and for aligning these reads as well. The following steps go through how we accomplish this in QIIME.  
 
-### 1.2.1 Assembling paired-end reads.
+### 1.2.1 Overlapping paired-end reads.
 
 ```
 join_paired_ends.py -f C01D01F_sub.fastq -r C01D01R_sub.fastq -o C01D01
@@ -68,6 +71,7 @@ First let's take a look at what the outputs of `join_paired_ends.py`.
 cd C01D01
 ls -lah
 ```
+
 You'll see three files here: `fastqjoin.join.fastq`, `fastqjoin.un1.fastq`, and `fastqjoin.un2.fastq`. `fastqjoin.join.fastq` contains all of the reads that were successfully merged, while `fastqjoin.un1.fastq` and `fastqjoin.un2.fastq` contain those reads which failed to merge form the forward and reverse files. Let's have a look at our merged sequences.
 
 ```
@@ -88,7 +92,7 @@ We can double check our sanity by using a positive control.  Let's investigate h
 ```
 grep '@HWI' ../C01D01F_sub.fastq | wc -l
 ```
-This returns 10,000. So our the program managed to merged about 75% of the reads. Just in case you aren't convinced as to how this works lets go ahead and redirect the grep command to a new file instead of to the word count command.
+This returns 10,000. So our the program managed to merge about 75% of the reads. Just in case you aren't convinced as to how this works lets go ahead and redirect the grep command to a new file instead of to the word count command.
 
 
 ```
@@ -102,6 +106,7 @@ Then feel free to use `wc -l` on this file to check the number of lines. The `-l
 ```
 wc -l C01D01_MergedHeaders.txt
 ```
+
 The output is once again 7670. Hope you're convinced now!
 
 Next, we are going to automate the previous process so we don't have to individually type in 54 lines of code. This means we need to clean up the directory for the sample we just did though. Move back a directory in the EDAMAME_16S/Fastq directory and execute the following command.  
@@ -111,19 +116,25 @@ rm -r C01D01
 
 ### 1.2.3  Automate paired-end merging with a shell script.
 
-We would have to execute an iteration of the `join_paired_ends.py` command for every pair of reads that need to be assembled. This could take a long time.  So, we'll use a [shell script](https://github.com/edamame-course/Amplicon_Analysis/blob/master/resources/Merged_Reads_Script.sh) to automate the task. You'll also need this [list](https://github.com/edamame-course/Amplicon_Analysis/blob/master/resources/list.txt) of file names.
+We would have to execute an iteration of the `join_paired_ends.py` command for every pair of datafiles. This could take a long time.  So, we'll use a [shell script](https://github.com/edamame-course/Amplicon_Analysis/blob/master/resources/Merged_Reads_Script.sh) to automate the task.
 
-To download the script and list onto the AMI, **first navigate to the "Fastq" directory**, use `curl` to get the files, and make a new `Merged_Reads` directory to put the merged reads into.
+
+To get and prepare to run this script, we will first navigate to the "Fastq" directory, then use `curl` to download the `Merged_Reads_Script.sh` file from the internet, and finally make a new `Merged_Reads` directory to put the merged reads into.
 
 ```
+cd ~/EDAMAME_16S/Fastq
 curl -O https://raw.githubusercontent.com/edamame-course/Amplicon_Analysis/master/resources/Merged_Reads_Script.sh
-```
-```
-curl -O https://raw.githubusercontent.com/edamame-course/Amplicon_Analysis/master/resources/list.txt
 mkdir Merged_Reads
 ```
 
-Change permissions on the script to make it executable:
+This script looks for and loops through a list of file stems in `list.txt`.
+We can generate this file from the directory listing:
+
+```
+ls ??????R_sub.fastq | cut -c 1-6 > list.txt
+```
+
+Now change permissions on the script to make it executable:
 ```
 chmod 755 Merged_Reads_Script.sh
 ```
@@ -133,17 +144,20 @@ chmod 755 Merged_Reads_Script.sh
 ```
 ./Merged_Reads_Script.sh
 ```
+
 _Bonus_: A little about this shell script
-For those of you interested in how this script works I recommend you take a look at it either through your terminal with `less` or online [here](https://github.com/edamame-course/Amplicon_Analysis/blob/master/resources/Merged_Reads_Script.sh). The script uses a "for loop" to repeat a set of commands for every single pair of files we have. For each sample the script first performs the merging with `join_paired_ends.py` and saves the output to a directory with the name of the sample. Secondly, because of some weird naming conventions the `join_paired_ends.py` function follows, the script renames and moves the resulting merged read files to a single directory each with their own name. Finally, the script removes the original directory that `join_paired_ends.py` as a cleanup step. This gets rid of 54 unnecessary directories making saving our instance space and our eyes the strain of having to look at them all everytime we want to `ls` in the directory.  
+For those of you interested in how this script works I recommend you take a look at it either through your terminal with `less` or online [here](https://github.com/edamame-course/Amplicon_Analysis/blob/master/resources/Merged_Reads_Script.sh). The script uses a "for loop" to repeat a set of commands for every single pair of files we have. For each sample the script first performs the merging with `join_paired_ends.py` and saves the output to a directory with the name of the sample. Secondly, because of some weird naming conventions the `join_paired_ends.py` function follows, the script renames and moves the resulting merged read files to a single directory each with their own name. Finally, the script removes the original directory that `join_paired_ends.py` as a cleanup step. This gets rid of 54 unnecessary directories making saving our instance space and our eyes the strain of having to look at them all every time we want to `ls` in the directory.  
+
 ### 1.2.4  Sanity check #2.
 
-How many files were we expecting from the assembly?  There were 54 pairs to be assembled, and we are generating one assembled fastq for each.  Thus, the Merged_reads directory should contain 54 files.  Navigate up one directory, and then use the `wc` (word count) command to check the number of files in the directory.
+How many files were we expecting from the overlapping step?  There were 54 pairs to be assembled, and we are generating one assembled fastq for each.  Thus, the Merged_reads directory should contain 54 files.  Navigate up one directory, and then use the `wc` (word count) command to check the number of files in the directory.
 
 ```
 ls -1 Merged_Reads | wc -l
 ```
 
 The terminal should return the number "54". Let's move this whole directory up one level so that we can access more easily with QIIME:
+
 ```
 mv Merged_Reads ..
 ```
@@ -159,9 +173,11 @@ QIIME requires a [mapping file](http://qiime.org/documentation/file_formats.html
 Let's spend few moments getting to know the mapping file.  Navigate to the MappingFiles subdirectory in the EDAMAME_16S/MappingFiles directory.
 
 ```
+cd ~/EDAMAME_16S/MappingFiles
 nano Centralia_Full_Map.txt
 ```
-**Warning** We are using the text editor `nano` to look at the mapping file because it easier to view. However, as the description implies, you can use `nano` to alter files. Just make sure you exit the program without saving any chances by pressing `ctrl+x`. If you have made changes to the fils it will ask you if you want to save them, you do not, so type `N` and `enter`.
+
+**Warning** We are using the text editor `nano` to look at the mapping file because it easier to view. However, as the description implies, you can use `nano` to alter files. Just make sure you exit the program without saving any chances by pressing `ctrl+x`. If you have made changes to the file it will ask you if you want to save them, you do not, so type `N` and `enter`.
 ![img5](../img/Mapping_File_Nano.png)
 
 A clear and comprehensive mapping file should contain all of the information that will be used in downstream analyses.  The mapping file includes both categorical (qualitative) and numeric (quantitative) contextual information about a sample. This could include, for example, information about the subject (sex, weight), the experimental treatment, time or spatial location, and all other measured variables (e.g., pH, oxygen, glucose levels). Creating a clear mapping file will provide direction as to appropriate analyses needed to test hypotheses.  Basically, all information for all anticipated analyses should be in the mapping file.
@@ -184,8 +200,10 @@ QIIME expects all of the data to be in one file, and, currently, we have one sep
 Navigate back to the EDAMAME_16S/ directory, then execute the following command:
 
 ```
+cd ~/EDAMAME_16S
 add_qiime_labels.py -i Merged_Reads/ -m MappingFiles/Centralia_Full_Map.txt -c InputFastaFileName -n 1
 ```
+
 Inspect the new file "combined_seqs.fna."
 
 ```
@@ -193,7 +211,6 @@ head combined_seqs.fna
 ```
 
 ![img6](../img/Combined_Seqs_Head.png)  
-
 
 Observe that QIIME has added the SampleIDs from the mapping file to the start of each sequence.  This allows QIIME to quickly link each sequence to its sampleID and metadata.
 
@@ -242,6 +259,7 @@ The link explains tmux in more detail, but for now, execute the following:
 ```
 tmux new -s OTUP
 ```
+
 Before continuing, make sure you are in the "EDAMAME_16S" directory.
 
 ```
@@ -291,8 +309,10 @@ If you want to build a tree with some other out-of-QIIME software, this is where
 
 
 How many failed alignments were there?   
+
 ```
-count_seqs.py -i rep_set_failures.fasta
+cd ~/EDAMAME_16S/uclust_openref
+count_seqs.py -i pynast_aligned_seqs/rep_set_failures.fasta
 ```
 
 We see that there were 690 rep. sequences that failed to align, and approximately 22,206 that did.  (Also, notice what short-read alignments generally look like...not amazing).
@@ -313,13 +333,16 @@ Move up a directory and then cd into the uclust_assigned_taxonomy directory.
 ```
 more rep_set_tax_assignments.txt
 ```
+
 In the "taxonomy" directory, you will find a log file and the specific taxonomic assignments given to each representative sequence, linked to the OTU ID of that representative sequence
 
 ##### Other Very Important Files in uclust_openref/
 ###### OTU map
+
 ```
 nano final_otu_map.txt
 ```
+
 Explore this file.  It links the exact sequences in each sample to its OTU ID. You should see an OTU ID (starting with the number of the first OTU that was picked) in the the left most column.  After that number, there is a list of Sequence IDs that have been clustered into that OTU ID.  The first part of the sequence ID is the SampleID from which it came, and the second part is the sequence number within that sample.  
 
 ![img7](../img/Final_OTUMAP_Nano.png)
@@ -333,15 +356,19 @@ Sanity check: How can you compare the OTUs in the full dataset versus the single
 These tables have the extension ".biom"  There are lots of [important resources](http://biom-format.org/) for understanding and working with the "biome" formatted tables, which were developed to deal with very large, sparse datasets, like those for microbial communities.  There are several versions - some omitting singletons (mc2), some containing taxonomic assignment of otus (w_tax), some omitting alignment failures (no_pynast_failures). Biom-formatted tables are actually a binary file, so looking at it with `less` or `more` won't be informative.  
 
 ###### Representative sequences (one from each OTU)
+
 ```   
 more rep_set.fna
 ```
+
 This is not an alignment, but the list of representative sequences used to assign taxonomy to the OTU, to make the alignment, and to build the tree.
 
 ###### Phylogenetic tree
+
 ```
 more rep_set.tre
 ```
+
 You can import this tree into any tree-visualization software that accepts the .tre extension ([Newick](http://marvin.cs.uidaho.edu/Teaching/CS515/newickFormat.html) format).  This is made from from an alignment of representative sequences (in the pynast directory).  The OTU ID is given first, and then the branch length to the next node. This format is generally compatible with other tree-building and viewing software. For example, I have used it to input into the [Interactive Tree of Life](http://itol.embl.de/) to build visually appealing figures. [Topiary Explorer](http://topiaryexplorer.sourceforge.net/) is another option for visualization, and is a QIIME add-on.
 
 ###### Log files
@@ -354,17 +381,17 @@ Open them up!  You will be delighted!  It has all of the information you ever wa
 
 # Resources and help
 ## QIIME
-  - [QIIME](qiime.org) offers a suite of developer-designed [tutorials](http://www.qiime.org/tutorials/tutorial.html).
-  - [Documentation](http://www.qiime.org/scripts/index.html) for all QIIME scripts.
-  - There is a very active [QIIME Forum](https://groups.google.com/forum/#!forum/qiime-forum) on Google Groups.  This is a great place to troubleshoot problems, responses often are returned in a few hours!
-  - The [QIIME Blog](http://qiime.wordpress.com/) provides updates like bug fixes, new features, and new releases.
-  - QIIME development is on [GitHub](https://github.com/biocore/qiime).
-  - Remember that QIIME is a workflow environment, and the original algorithms/software that are compiled into QIIME must be referenced individually (e.g., PyNAST, RDP classifier, FastTree etc...)
+* [QIIME](http://qiime.org) offers a suite of developer-designed [tutorials](http://www.qiime.org/tutorials/tutorial.html).
+* [Documentation](http://www.qiime.org/scripts/index.html) for all QIIME scripts.
+* There is a very active [QIIME Forum](https://groups.google.com/forum/#!forum/qiime-forum) on Google Groups.  This is a great place to troubleshoot problems, responses often are returned in a few hours!
+* The [QIIME Blog](http://qiime.wordpress.com/) provides updates like bug fixes, new features, and new releases.
+* QIIME development is on [GitHub](https://github.com/biocore/qiime).
+* Remember that QIIME is a workflow environment, and the original algorithms/software that are compiled into QIIME must be referenced individually (e.g., PyNAST, RDP classifier, FastTree etc...)
 
 ## Biom format
-  - [Motivation and documentaiton](http://biom-format.org/)
-  - [Coming-out paper McDonald et al. 2012](http://www.gigasciencejournal.com/content/1/1/7)
-  - [GitHub](https://github.com/biocore/biom-format)
+* [Motivation and documentaiton](http://biom-format.org/)
+* [Coming-out paper McDonald et al. 2012](http://www.gigasciencejournal.com/content/1/1/7)
+* [GitHub](https://github.com/biocore/biom-format)
 
 -----------------------------------------------
 -----------------------------------------------

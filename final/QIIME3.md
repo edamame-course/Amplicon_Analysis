@@ -16,6 +16,8 @@ EDAMAME tutorials have a CC-BY [license](https://github.com/edamame-course/2015-
 
 ## Overarching Goal
 * This tutorial will contribute towards an understanding of **microbial amplicon analysis**
+This lesson takes evenly-subsampled taxonomy data in biom format, performs PCoA ordination, makes plots colored by metadata from the mapping file, and 
+copies the end-result visualizations off of our instance.
 
 ## Learning Objectives
 * Calculate resemblance matrices from an OTU table
@@ -33,6 +35,7 @@ EDAMAME tutorials have a CC-BY [license](https://github.com/edamame-course/2015-
 Make sure that you are in the EDAMAME_16S/uclust_openref/ directory.  
 
 If you need the otu_table_mc2_w_tax_even5196.biom file from Parts 1 and 2 of the tutorial you can use curl to grab it from GitHub:
+
 ```
 curl -O https://raw.githubusercontent.com/edamame-course/Amplicon_Analysis/master/resources/otu_table_mc2_w_tax_even5196.biom
 ```
@@ -44,6 +47,7 @@ Use the `-s` option to see all of the different options for calculating comparat
 ```
 beta_diversity.py -s
 ```
+
 What are all these indices, mathematically?  Where do they all come from?  All that info is in the guts of the [script](https://github.com/pycogent/pycogent/blob/master/cogent/maths/distance_transform.py), which is really hard to work through, but it is there.
 
 To compare weighted/unweighted and phylogenetic/taxonomic metrics, we will ask QIIME to create four resemblance matrices of all of these different flavors.  Navigate into the uclust_openref/ directory.
@@ -51,9 +55,11 @@ To compare weighted/unweighted and phylogenetic/taxonomic metrics, we will ask Q
 ```
 beta_diversity.py -i otu_table_mc2_w_tax_even5196.biom -m unweighted_unifrac,weighted_unifrac,binary_sorensen_dice,bray_curtis -o compar_div_even5196/ -t rep_set.tre
 ```
+
 Due to a bug in this version of QIIME (v 1.9.1), this may return a warning that says "VisibleDeprecationWarning". Do not be alarmed. The script has still worked as it was supposed to. Navigate to the new directory called "compar_div_even5196".
 
 There should be four new resemblance matrices in the directory.  Use nano to open them and compare their values.  
+
 ```
 nano binary_sorensen_dice_otu_table_mc2_w_tax_even5196.txt
 ```
@@ -91,6 +97,7 @@ If we navigate into the new directory, we see there is one results file for each
 ![img17](../img/PCoA_Directory.png)
 
 Inspect one of these files.
+
 ```
 nano pcoa_bray_curtis_otu_table_mc2_w_tax_even5196.txt
 ```
@@ -108,6 +115,7 @@ We can make 2d plots of the output of `principal_coordinates.py`, and map the co
 ```
 make_2d_plots.py -i compar_div_even5196_PCoA/pcoa_weighted_unifrac_otu_table_mc2_w_tax_even5196.txt -m ../MappingFiles/Centralia_Full_Map.txt -o PCoA_2D_plot/
 ```
+
 (This will also give a runtime warning: "More than 20 figures have been opened. Figures created through the pyplot interface (`matplotlib.pyplot.figure`) are retained until explicitly closed and may consume too much memory." However, the script will execute as intended.)
 
 Open a new (non- EC2) terminal. Use scp from the new terminal to transfer the new html file and its companion files in a directory with a nonsense name similar to ```tmpCOqXlM``` to your desktop (using `-r` to take the whole directory), then open the html file.
@@ -138,6 +146,7 @@ nmds.py -i compar_div_even5196/bray_curtis_otu_table_mc2_w_tax_even5196.txt -o N
 cd NMDS_Plot
 head mc2_even5196_braycurtis_NMDS_coords.txt
 ```
+
 ![img20](../img/NMDS_BC.png)
 
 We can also make a quick heatmap in QIIME, which shows the number of sequences per sample relative to one another.  For our sanity (do you really want to look at ~20K OTUs at once?), let's make this heatmap at the phylum level.  To do this, we will use our phylum-level OTU table in the WS_aDiversity/ directory
@@ -147,6 +156,7 @@ make_otu_heatmap.py -i WS_aDiversity_even5196/taxa_summary5196/otu_table_mc2_w_t
 ```
 
 Move it to your desktop and open.
+
 ```
  scp -r -i **yourkey** ubuntu@**yourDNS**:EDAMAME_16S/uclust_openref/heatmap_L2_even5196.pdf  ~/Desktop
 ```
@@ -171,7 +181,7 @@ This command changes frequently, as the biom format is a work in progress.  Use 
 In the example below, we are making a tab-delimited text file (designated by the `--to-tsv` option) and including a final column for taxonomic assignment called "Consensus lineage".
 
 ```
-biom convert -i otu_table_mc2_w_tax_even5196_CollapseReps.biom -o otu_table_mc2_w_tax_even5196_CollapseReps.txt --table-type "OTU table" --to-tsv --header-key taxonomy --output-metadata-id "ConsensusLineage"
+biom convert -i otu_table_mc2_w_tax_even5196_CollapseReps.biom -o otu_table_M2_w_tax_even5196_CollapseReps.txt --table-type "OTU table" --to-tsv --header-key taxonomy --output-metadata-id "ConsensusLineage"
 ```
 
 What are we going to do with this file?  Move it to our desktop for our future R analysis, of course!  Switch to your computer's terminal (not the EC2) to transfer the file using `scp`.
@@ -196,7 +206,7 @@ Now, open it and make sure it is as you expect.  It should be a classic Species 
 * [Documentation](http://biom-format.org/documentation/biom_conversion.html)
 
 ### QIIME help
-*  [QIIME](qiime.org) offers a suite of developer-designed [tutorials](http://www.qiime.org/tutorials/tutorial.html).
+*  [QIIME](http://qiime.org) offers a suite of developer-designed [tutorials](http://www.qiime.org/tutorials/tutorial.html).
 *  [Documentation](http://www.qiime.org/scripts/index.html) for all QIIME scripts.
 *  There is a very active [QIIME Forum](https://groups.google.com/forum/#!forum/qiime-forum) on Google Groups.  This is a great place to troubleshoot problems, responses often are returned in a few hours!
 *  The [QIIME Blog](http://qiime.wordpress.com/) provides updates like bug fixes, new features, and new releases.
